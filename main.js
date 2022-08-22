@@ -107,3 +107,4 @@ coinPriceLoad();
 // });
 
 bot.onText(/\/btc/, coinPriceLoad);
+bot.sendMessage(chatId, `안녕`);
