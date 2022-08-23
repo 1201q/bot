@@ -42,6 +42,18 @@ const options2 = {
   headers: { Accept: "application/json" },
 };
 
+const options3 = {
+  method: "POST",
+  url: "https://api.upbit.com/v1/deposits/krw",
+  headers: {
+    Accept: "application/json",
+    Authorization:
+      "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3Nfa2V5IjoiNjU5WTFSTGlLN1lQb09jT0kxcmlFY25sR2dlVm1XOGsxaUxQdjJQUiIsIm5vbmNlIjoiMTIwMTEyMDExMSJ9.u36p4bmBSTanBf5C1Qlag4qxE14E9LLLhSclCKvQ9bE",
+    "Content-Type": "application/json",
+  },
+  data: { amount: "10000" },
+};
+
 // interval 기능
 // const interval = setInterval(coinPriceLoad, 1000);
 
@@ -51,6 +63,15 @@ const options2 = {
 const TestApiCall = async (p) => {
   try {
     const response = await axios.get(p.url, p); // url , request(추가정보)
+    return response;
+  } catch (err) {
+    console.log("Error >>", err);
+  }
+};
+
+const TestApiCallPost = async (p) => {
+  try {
+    const response = await axios.post(p.url, p); // url , request(추가정보)
     return response;
   } catch (err) {
     console.log("Error >>", err);
@@ -99,6 +120,10 @@ function coinSelectControl(coinName) {
   }
 }
 
+function accountAmountControl(amount) {
+  options3.data["amount"] = amount;
+}
+
 bot.onText(/\/btc/, () => {
   // if (coinsetting === false) {
   //   bot.sendMessage(chatId, `기본코인을 설정하세요.`);
@@ -130,6 +155,60 @@ bot.onText(/\/코인목록/, () => {
       `현재 원화마켓에서 가능한 코인이에요. \n ${coinListArr.kor}`
     );
   }
+});
+
+bot.onText(/\/계좌/, () => {
+  TestApiCall(accoptions).then((res) => {
+    bot.sendMessage(
+      chatId,
+      `내 계좌잔액 : ${Math.floor(res.data[0].balance)}원`
+    );
+    console.log(res.data[0].balance);
+  });
+});
+
+bot.onText(/\/입금 (.+)/, (msg, match) => {
+  const request = require("request");
+  const uuidv4 = require("uuid/v4");
+  const crypto = require("crypto");
+  const sign = require("jsonwebtoken").sign;
+  const queryEncode = require("querystring").encode;
+
+  const access_key = "659Y1RLiK7YPoOcOI1riEcnlGgeVmW8k1iLPv2PR";
+  const secret_key = "92MyZWgw5YVR2x3RVip0ttWem0mmKCsvgbTMfvAo";
+  const server_url = "https://api.upbit.com";
+
+  const body = {
+    amount: "10000",
+  };
+
+  const query = queryEncode(body);
+
+  const hash = crypto.createHash("sha512");
+  const queryHash = hash.update(query, "utf-8").digest("hex");
+
+  const payload = {
+    access_key: access_key,
+    nonce: uuidv4(),
+    query_hash: queryHash,
+    query_hash_alg: "SHA512",
+  };
+
+  const token2 = sign(payload, secret_key);
+
+  const options = {
+    method: "POST",
+    url: server_url + "/v1/deposits/krw",
+    headers: {
+      Authorization: `Bearer ${token2}`,
+    },
+    json: body,
+  };
+
+  request(options, (error, response, body) => {
+    if (error) throw new Error(error);
+    console.log(body);
+  });
 });
 
 // bot.onText(/\/이름 (.+)/, (msg, match) => {
