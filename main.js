@@ -15,13 +15,6 @@ const accoptions = {
 };
 
 let playing = true;
-// const button = document.querySelector(".btn");
-// const button2 = document.querySelector(".btn2");
-// const stop = document.querySelector(".stop");
-// const start = document.querySelector(".start");
-// const inputtext = document.querySelector(".inputtext");
-// const inputsubmit = document.querySelector(".inputsubmit");
-// const form = document.querySelector(".submitform");
 
 const options = {
   method: "GET",
@@ -43,6 +36,7 @@ const options2 = {
 // axios.get 결과값 리턴
 // 인자 p가 무슨 정보 받아올지 결정하는 인자
 // option1이면 시세, 2면 목록
+
 const TestApiCall = async (p) => {
   try {
     const response = await axios.get(p.url, p); // url , request(추가정보)
@@ -56,16 +50,13 @@ const TestApiCall = async (p) => {
 // res로 받아옴
 function coinPriceLoad() {
   TestApiCall(options).then((res) => {
-    console.log(
-      `${res.data[0].trade_price.toLocaleString()}원 / ${(
-        res.data[0].signed_change_rate * 100
-      ).toFixed(2)}% / ${res.data[0].signed_change_price.toLocaleString()}원`
-    );
     bot.sendMessage(
       chatId,
-      `${res.data[0].trade_price.toLocaleString()}원 / ${(
+      `${res.data[0].trade_price.toLocaleString()}원이고 ${(
         res.data[0].signed_change_rate * 100
-      ).toFixed(2)}% / ${res.data[0].signed_change_price.toLocaleString()}원`
+      ).toFixed(
+        2
+      )}%만큼 변화했어요. 어제보다 ${res.data[0].signed_change_price.toLocaleString()}원 변화했어요.`
     );
   });
 }
@@ -83,6 +74,17 @@ function coinSelectControl(i) {
 }
 
 coinPriceLoad();
+
+bot.onText(/\/btc/, coinPriceLoad);
+bot.sendMessage(chatId, `응답할 준비가 되었어요!`);
+
+// const button = document.querySelector(".btn");
+// const button2 = document.querySelector(".btn2");
+// const stop = document.querySelector(".stop");
+// const start = document.querySelector(".start");
+// const inputtext = document.querySelector(".inputtext");
+// const inputsubmit = document.querySelector(".inputsubmit");
+// const form = document.querySelector(".submitform");
 
 // button.addEventListener("click", () => {
 //   coinSelectControl(inputtext.value);
@@ -105,6 +107,3 @@ coinPriceLoad();
 // button2.addEventListener("click", () => {
 //   coinPriceLoad();
 // });
-
-bot.onText(/\/btc/, coinPriceLoad);
-bot.sendMessage(chatId, `안녕`);
